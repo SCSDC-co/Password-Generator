@@ -186,7 +186,7 @@ footer_label = ctk.CTkLabel(
     text="© 2025 SCSDC. Tutti i diritti riservati",
     font=("Helvetica", 12, "italic")
 )
-footer_label.pack(side="bottom", pady=(10, 5))
+footer_label.place(relx=0.5, rely=1, anchor="s")
 aggiorna_colore_footer()
 
 # === Avvio dell'app ===
