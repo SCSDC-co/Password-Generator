@@ -97,7 +97,7 @@ def save_password():
         data["passwords"].append(password)
         with open(json_password_file, "w") as f:
             json.dump(data, f, indent=4)
-        messagebox.showinfo("Saved", "Password saved to JSON file!")
+        messagebox.showinfo("Saved", "Password saved!")
     else:
         messagebox.showwarning("Empty", "Generate a password first.")
 
@@ -223,7 +223,7 @@ def center_window(window):
 
 # === Main GUI ===
 app = ctk.CTk()
-app.title("Password Generator")
+app.title("SuperCool Password Generator")
 app.geometry("500x470")
 app.resizable(False, False)
 
