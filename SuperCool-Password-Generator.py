@@ -6,87 +6,87 @@ import string
 import json
 from tkinter.simpledialog import askstring
 
-# === Percorso sicuro ===
+# === Secure Path ===
 config_dir = os.path.join(os.path.expanduser("~"), ".password_generator")
 os.makedirs(config_dir, exist_ok=True)
 config_file = os.path.join(config_dir, "theme_config.json")
 json_password_file = os.path.join(config_dir, "passwords.json")
-password_utente_file = os.path.join(config_dir, "password_utente.json")
+user_password_file = os.path.join(config_dir, "user_password.json")
 
-# === Stato tema ===
-tema_scuro = False
-def carica_tema():
-    global tema_scuro
+# === Theme State ===
+dark_theme = False
+def load_theme():
+    global dark_theme
     if os.path.exists(config_file):
         with open(config_file, "r") as f:
             config = json.load(f)
-            tema_scuro = config.get("switch_attivo", False)
-            return config.get("tema", "Light")
+            dark_theme = config.get("switch_active", False)
+            return config.get("theme", "Light")
     return "Light"
 
-def salva_tema(tema):
+def save_theme(theme):
     with open(config_file, "w") as f:
-        json.dump({"tema": tema, "switch_attivo": tema == "Dark"}, f)
+        json.dump({"theme": theme, "switch_active": theme == "Dark"}, f)
 
-ctk.set_appearance_mode(carica_tema())
+ctk.set_appearance_mode(load_theme())
 ctk.set_default_color_theme("blue")
 
-def cambia_tema():
-    global tema_scuro
-    tema_scuro = not tema_scuro
-    nuovo_tema = "Dark" if tema_scuro else "Light"
-    ctk.set_appearance_mode(nuovo_tema)
-    salva_tema(nuovo_tema)
-    aggiorna_icone()
-    aggiorna_colore_footer()
+def change_theme():
+    global dark_theme
+    dark_theme = not dark_theme
+    new_theme = "Dark" if dark_theme else "Light"
+    ctk.set_appearance_mode(new_theme)
+    save_theme(new_theme)
+    update_icons()
+    update_footer_color()
 
-def aggiorna_icone():
-    pass  # Rimosso il codice per l'aggiornamento dell'icona
+def update_icons():
+    pass  # Removed icon update code
 
-def aggiorna_colore_footer():
-    colore = "#FFFFFF" if tema_scuro else "#000000"
-    footer_label.configure(text_color=colore)
+def update_footer_color():
+    color = "#FFFFFF" if dark_theme else "#000000"
+    footer_label.configure(text_color=color)
 
-def genera_password(lunghezza, lettere, numeri, simboli):
-    caratteri = ""
-    if lettere: caratteri += string.ascii_letters
-    if numeri: caratteri += string.digits
-    if simboli: caratteri += string.punctuation
-    if not caratteri: raise ValueError("Seleziona almeno una categoria!")
-    return ''.join(random.choices(caratteri, k=lunghezza))
+def generate_password(length, letters, numbers, symbols):
+    characters = ""
+    if letters: characters += string.ascii_letters
+    if numbers: characters += string.digits
+    if symbols: characters += string.punctuation
+    if not characters: raise ValueError("Select at least one category!")
+    return ''.join(random.choices(characters, k=length))
 
-def genera():
+def generate():
     try:
-        lunghezza = int(entry_lunghezza.get())
-        if lunghezza < 4: raise ValueError("Minimo 4 caratteri")
-        password = genera_password(
-            lunghezza, check_lettere.get(), check_numeri.get(), check_simboli.get()
+        length = int(entry_length.get())
+        if length < 4: raise ValueError("Minimum 4 characters")
+        password = generate_password(
+            length, check_letters.get(), check_numbers.get(), check_symbols.get()
         )
         output_var.set(password)
-        forza, colore = valuta_forza(password)
-        strength_label.configure(text=f"Forza: {forza}", text_color=colore)
+        strength, color = evaluate_strength(password)
+        strength_label.configure(text=f"Strength: {strength}", text_color=color)
         strength_label.pack(pady=(5, 10))
     except ValueError as e:
-        messagebox.showerror("Errore", str(e))
+        messagebox.showerror("Error", str(e))
 
-def valuta_forza(password):
+def evaluate_strength(password):
     score = 0
     if len(password) >= 8: score += 1
     if any(c.islower() for c in password) and any(c.isupper() for c in password): score += 1
     if any(c.isdigit() for c in password): score += 1
     if any(c in string.punctuation for c in password): score += 1
-    if score <= 1: return "Debole", "red"
-    elif score <= 3: return "Media", "orange"
-    return "Forte", "green"
+    if score <= 1: return "Weak", "red"
+    elif score <= 3: return "Medium", "orange"
+    return "Strong", "green"
 
-def copia_password():
+def copy_password():
     password = output_var.get()
     if password:
         app.clipboard_clear()
         app.clipboard_append(password)
-        messagebox.showinfo("Copiata!", "Password copiata!")
+        messagebox.showinfo("Copied!", "Password copied!")
 
-def salva_password():
+def save_password():
     password = output_var.get()
     if password:
         if os.path.exists(json_password_file):
@@ -97,30 +97,30 @@ def salva_password():
         data["passwords"].append(password)
         with open(json_password_file, "w") as f:
             json.dump(data, f, indent=4)
-        messagebox.showinfo("Salvata", "Password salvata nel file JSON!")
+        messagebox.showinfo("Saved", "Password saved to JSON file!")
     else:
-        messagebox.showwarning("Vuota", "Genera prima una password.")
+        messagebox.showwarning("Empty", "Generate a password first.")
 
-def richiedi_password_visualizzazione():
-    if os.path.exists(password_utente_file):
-        mostra_finestra_password()
+def request_password_visualization():
+    if os.path.exists(user_password_file):
+        show_password_window()
     else:
-        imposta_password_iniziale()
+        set_initial_password()
 
-def imposta_password_iniziale():
-    def salva_password():
-        nuova = entry.get()
-        if nuova:
-            with open(password_utente_file, "w") as f:
-                json.dump({"password": nuova}, f)
-            messagebox.showinfo("Password impostata", "Password impostata con successo!")
+def set_initial_password():
+    def save_password():
+        new_pw = entry.get()
+        if new_pw:
+            with open(user_password_file, "w") as f:
+                json.dump({"password": new_pw}, f)
+            messagebox.showinfo("Password set", "Password set successfully!")
             pw_window.destroy()
 
     pw_window = ctk.CTkToplevel(app)
-    pw_window.title("Imposta password")
+    pw_window.title("Set Password")
     pw_window.geometry("350x100")
     pw_window.resizable(False, False)
-    # Rimosso il .iconbitmap(img_ico)
+    # Removed .iconbitmap(img_ico)
 
     frame = ctk.CTkFrame(pw_window)
     frame.pack(pady=10, padx=10)
@@ -128,30 +128,30 @@ def imposta_password_iniziale():
     entry = ctk.CTkEntry(frame, show="*")
     entry.pack(side="left", padx=(0, 5))
 
-    mostra = ctk.CTkButton(frame, text="Mostra", width=40,
-                           command=lambda: toggle_password(entry, mostra))
-    mostra.pack(side="left")
+    show_button = ctk.CTkButton(frame, text="Show", width=40,
+                                 command=lambda: toggle_password(entry, show_button))
+    show_button.pack(side="left")
 
-    ctk.CTkButton(pw_window, text="OK", command=salva_password).pack(pady=5)
-    centra_finestra(pw_window)  # Centra la finestra
+    ctk.CTkButton(pw_window, text="OK", command=save_password).pack(pady=5)
+    center_window(pw_window)  # Center the window
 
-def mostra_finestra_password():
+def show_password_window():
     pw_window = ctk.CTkToplevel(app)
-    pw_window.title("Inserisci password")
+    pw_window.title("Enter Password")
     pw_window.geometry("350x100")
     pw_window.resizable(False, False)
-    # Rimosso il .iconbitmap(img_ico)
+    # Removed .iconbitmap(img_ico)
 
-    def verifica():
-        inserita = entry.get()
-        if not inserita: return
-        with open(password_utente_file, "r") as f:
-            password_salvata = json.load(f)["password"]
-        if inserita == password_salvata:
+    def verify():
+        entered = entry.get()
+        if not entered: return
+        with open(user_password_file, "r") as f:
+            saved_password = json.load(f)["password"]
+        if entered == saved_password:
             pw_window.destroy()
-            visualizza_passwords()
+            visualize_passwords()
         else:
-            messagebox.showerror("Errore", "Password errata!")
+            messagebox.showerror("Error", "Incorrect password!")
 
     frame = ctk.CTkFrame(pw_window)
     frame.pack(pady=10, padx=10)
@@ -159,22 +159,22 @@ def mostra_finestra_password():
     entry = ctk.CTkEntry(frame, show="*")
     entry.pack(side="left", padx=(0, 5))
 
-    mostra = ctk.CTkButton(frame, text="Mostra", width=40,
-                           command=lambda: toggle_password(entry, mostra))
-    mostra.pack(side="left")
+    show_button = ctk.CTkButton(frame, text="Show", width=40,
+                                 command=lambda: toggle_password(entry, show_button))
+    show_button.pack(side="left")
 
-    ctk.CTkButton(pw_window, text="OK", command=verifica).pack(pady=5)
-    centra_finestra(pw_window)  # Centra la finestra
+    ctk.CTkButton(pw_window, text="OK", command=verify).pack(pady=5)
+    center_window(pw_window)  # Center the window
 
 def toggle_password(entry, button):
     if entry.cget("show") == "":
         entry.configure(show="*")
-        button.configure(text="Mostra")
+        button.configure(text="Show")
     else:
         entry.configure(show="")
-        button.configure(text="Nascondi")
+        button.configure(text="Hide")
 
-def visualizza_passwords():
+def visualize_passwords():
     if os.path.exists(json_password_file):
         with open(json_password_file, "r") as f:
             data = json.load(f)
@@ -182,10 +182,10 @@ def visualizza_passwords():
 
         if passwords:
             pw_win = ctk.CTkToplevel(app)
-            pw_win.title("Password Salvate")
+            pw_win.title("Saved Passwords")
             pw_win.geometry("400x400")
             pw_win.resizable(False, False)
-            # Rimosso il .iconbitmap(img_ico)
+            # Removed .iconbitmap(img_ico)
 
             box = ctk.CTkFrame(pw_win, fg_color="transparent")
             box.pack(fill="both", expand=True, padx=10, pady=10)
@@ -194,36 +194,36 @@ def visualizza_passwords():
                 frame = ctk.CTkFrame(box, fg_color="transparent")
                 frame.pack(fill="x", pady=5)
 
-                colore_tema = "white" if tema_scuro else "black"
+                theme_color = "white" if dark_theme else "black"
 
                 password_entry = ctk.CTkEntry(frame, state="normal", font=("Helvetica", 14))
                 password_entry.insert(0, password)
                 password_entry.configure(
                     state="readonly",
-                    text_color=colore_tema,
+                    text_color=theme_color,
                     fg_color=ctk.CTk().cget("fg_color"),
                     border_width=0,
                     border_color=ctk.CTk().cget("fg_color")
                 )
                 password_entry.pack(side="left", fill="x", expand=True)
                 password_entry.select_range(0, len(password))
-            centra_finestra(pw_win)  # Centra la finestra
+            center_window(pw_win)  # Center the window
         else:
-            messagebox.showinfo("Nessuna Password", "Nessuna password salvata.")
+            messagebox.showinfo("No Passwords", "No passwords saved.")
     else:
-        messagebox.showinfo("Nessuna Password", "Nessuna password salvata.")
+        messagebox.showinfo("No Passwords", "No passwords saved.")
 
-def centra_finestra(finestra):
-    finestra.update_idletasks()
-    w = finestra.winfo_width()
-    h = finestra.winfo_height()
-    x = (finestra.winfo_screenwidth() // 2) - (w // 2)
-    y = (finestra.winfo_screenheight() // 2) - (h // 2)
-    finestra.geometry(f"+{x}+{y}")
+def center_window(window):
+    window.update_idletasks()
+    w = window.winfo_width()
+    h = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (w // 2)
+    y = (window.winfo_screenheight() // 2) - (h // 2)
+    window.geometry(f"+{x}+{y}")
 
-# === GUI Principale ===
+# === Main GUI ===
 app = ctk.CTk()
-app.title("Generatore di Password")
+app.title("Password Generator")
 app.geometry("500x470")
 app.resizable(False, False)
 
@@ -236,49 +236,49 @@ left_space.pack(side="left")
 
 center_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
 center_frame.pack(side="left", expand=True)
-titolo = ctk.CTkLabel(center_frame, text="Generatore di Password", font=("Helvetica", 20, "bold"))
-titolo.pack(anchor="center")
+title = ctk.CTkLabel(center_frame, text="Password Generator", font=("Helvetica", 20, "bold"))
+title.pack(anchor="center")
 
 right_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
 right_frame.pack(side="right")
-theme_switch = ctk.CTkSwitch(right_frame, text="", command=cambia_tema)
+theme_switch = ctk.CTkSwitch(right_frame, text="", command=change_theme)
 theme_switch.pack(anchor="e")
-theme_switch.select() if tema_scuro else theme_switch.deselect()
+theme_switch.select() if dark_theme else theme_switch.deselect()
 
 # Input
-frame_lunghezza = ctk.CTkFrame(app, fg_color="transparent")
-frame_lunghezza.pack(pady=5)
-ctk.CTkLabel(frame_lunghezza, text="Lunghezza:", font=("Helvetica", 14)).pack(side="left", padx=(0, 10))
-entry_lunghezza = ctk.CTkEntry(frame_lunghezza, width=60, font=("Helvetica", 14))
-entry_lunghezza.insert(0, "12")
-entry_lunghezza.pack(side="left")
+length_frame = ctk.CTkFrame(app, fg_color="transparent")
+length_frame.pack(pady=5)
+ctk.CTkLabel(length_frame, text="Length:", font=("Helvetica", 14)).pack(side="left", padx=(0, 10))
+entry_length = ctk.CTkEntry(length_frame, width=60, font=("Helvetica", 14))
+entry_length.insert(0, "12")
+entry_length.pack(side="left")
 
 # Checkboxes
-check_lettere = ctk.CTkCheckBox(app, text="Lettere", font=("Helvetica", 14))
-check_numeri = ctk.CTkCheckBox(app, text="Numeri", font=("Helvetica", 14))
-check_simboli = ctk.CTkCheckBox(app, text="Simboli", font=("Helvetica", 14))
-check_lettere.select()
-check_numeri.select()
-check_simboli.select()
-check_lettere.pack(pady=3)
-check_numeri.pack(pady=3)
-check_simboli.pack(pady=3)
+check_letters = ctk.CTkCheckBox(app, text="Letters", font=("Helvetica", 14))
+check_numbers = ctk.CTkCheckBox(app, text="Numbers", font=("Helvetica", 14))
+check_symbols = ctk.CTkCheckBox(app, text="Symbols", font=("Helvetica", 14))
+check_letters.select()
+check_numbers.select()
+check_symbols.select()
+check_letters.pack(pady=3)
+check_numbers.pack(pady=3)
+check_symbols.pack(pady=3)
 
-# Pulsanti
-ctk.CTkButton(app, text="🎲 Genera Password", command=genera, font=("Helvetica", 16, "bold")).pack(pady=15)
+# Buttons
+ctk.CTkButton(app, text="🎲 Generate Password", command=generate, font=("Helvetica", 16, "bold")).pack(pady=15)
 
 output_var = ctk.StringVar()
 ctk.CTkEntry(app, textvariable=output_var, width=300, font=("Helvetica", 14)).pack(pady=(5, 0))
 strength_label = ctk.CTkLabel(app, text="", font=("Helvetica", 14, "bold"))
 
-ctk.CTkButton(app, text="📋 Copia Password", command=copia_password, font=("Helvetica", 16, "bold")).pack(pady=10)
-ctk.CTkButton(app, text="💾 Salva Password", command=salva_password, font=("Helvetica", 16, "bold")).pack(pady=10)
-ctk.CTkButton(app, text="🔐 Visualizza Password", command=richiedi_password_visualizzazione, font=("Helvetica", 16, "bold")).pack(pady=10)
+ctk.CTkButton(app, text="📋 Copy Password", command=copy_password, font=("Helvetica", 16, "bold")).pack(pady=10)
+ctk.CTkButton(app, text="💾 Save Password", command=save_password, font=("Helvetica", 16, "bold")).pack(pady=10)
+ctk.CTkButton(app, text="🔐 View Passwords", command=request_password_visualization, font=("Helvetica", 16, "bold")).pack(pady=10)
 
 # Footer
-footer_label = ctk.CTkLabel(app, text="© 2025 SCSDC. Tutti i diritti riservati", font=("Helvetica", 12, "italic"))
+footer_label = ctk.CTkLabel(app, text="© 2025 SCSDC. All rights reserved", font=("Helvetica", 12, "italic"))
 footer_label.place(relx=0.5, rely=1, anchor="s")
-aggiorna_colore_footer()
+update_footer_color()
 
-# Avvio
+# Start
 app.mainloop()
