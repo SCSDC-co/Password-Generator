@@ -5,8 +5,6 @@
 The Password Generator is a desktop application that allows you to generate secure and customizable passwords quickly and easily.  
 You can choose the length of the password and decide whether to include letters, numbers, and symbols.
 
-GitHub: [SCSDC-co/Password-Generator](https://github.com/SCSDC-co/Password-Generator)
-
 ## Features
 
 - Generation of secure passwords  
