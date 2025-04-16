@@ -25,11 +25,12 @@ You can choose the length of the password and decide whether to include letters,
 
 ## ⚠️ Security Note
 
-Saved passwords are stored in plain text.
+Saved passwords are stored in clear text.
 
 Even though the file is saved in a hidden folder, it is still readable by anyone who has access to the system.
 
-To enhance protection, the application will ask for your system password before showing saved passwords.
+To enhance protection, the application will ask for a password you will choose before showing saved passwords.  
+But anyone can access the folder where the passwords are stored.
 
 ## 📝 License
 
