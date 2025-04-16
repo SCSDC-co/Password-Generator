@@ -6,16 +6,18 @@ import string
 import json
 from tkinter.simpledialog import askstring
 
-# === Secure Path ===
+# === Secure Path Configuration ===
 config_dir = os.path.join(os.path.expanduser("~"), ".password_generator")
 os.makedirs(config_dir, exist_ok=True)
 config_file = os.path.join(config_dir, "theme_config.json")
 json_password_file = os.path.join(config_dir, "passwords.json")
 user_password_file = os.path.join(config_dir, "user_password.json")
 
-# === Theme State ===
+# === Theme Management ===
 dark_theme = False
+
 def load_theme():
+    """Loads the theme preference from the configuration file."""
     global dark_theme
     if os.path.exists(config_file):
         with open(config_file, "r") as f:
@@ -25,6 +27,7 @@ def load_theme():
     return "Light"
 
 def save_theme(theme):
+    """Saves the theme preference to the configuration file."""
     with open(config_file, "w") as f:
         json.dump({"theme": theme, "switch_active": theme == "Dark"}, f)
 
@@ -32,22 +35,21 @@ ctk.set_appearance_mode(load_theme())
 ctk.set_default_color_theme("blue")
 
 def change_theme():
+    """Toggles the application theme between Light and Dark."""
     global dark_theme
     dark_theme = not dark_theme
     new_theme = "Dark" if dark_theme else "Light"
     ctk.set_appearance_mode(new_theme)
     save_theme(new_theme)
-    update_icons()
     update_footer_color()
 
-def update_icons():
-    pass  # Removed icon update code
-
 def update_footer_color():
+    """Updates the footer label color based on the current theme."""
     color = "#FFFFFF" if dark_theme else "#000000"
     footer_label.configure(text_color=color)
 
 def generate_password(length, letters, numbers, symbols):
+    """Generates a random password based on the specified criteria."""
     characters = ""
     if letters: characters += string.ascii_letters
     if numbers: characters += string.digits
@@ -56,6 +58,7 @@ def generate_password(length, letters, numbers, symbols):
     return ''.join(random.choices(characters, k=length))
 
 def generate():
+    """Handles the password generation process when the generate button is clicked."""
     try:
         length = int(entry_length.get())
         if length < 4: raise ValueError("Minimum 4 characters")
@@ -70,6 +73,7 @@ def generate():
         messagebox.showerror("Error", str(e))
 
 def evaluate_strength(password):
+    """Evaluates the strength of a password and returns a label and color."""
     score = 0
     if len(password) >= 8: score += 1
     if any(c.islower() for c in password) and any(c.isupper() for c in password): score += 1
@@ -80,6 +84,7 @@ def evaluate_strength(password):
     return "Strong", "green"
 
 def copy_password():
+    """Copies the generated password to the clipboard."""
     password = output_var.get()
     if password:
         app.clipboard_clear()
@@ -87,6 +92,7 @@ def copy_password():
         messagebox.showinfo("Copied!", "Password copied!")
 
 def save_password():
+    """Saves the generated password to a JSON file."""
     password = output_var.get()
     if password:
         if os.path.exists(json_password_file):
@@ -97,18 +103,21 @@ def save_password():
         data["passwords"].append(password)
         with open(json_password_file, "w") as f:
             json.dump(data, f, indent=4)
-        messagebox.showinfo("Saved", "Password saved!")
+        messagebox.showinfo("Saved", "Password saved to JSON file!")
     else:
         messagebox.showwarning("Empty", "Generate a password first.")
 
 def request_password_visualization():
+    """Requests the user's password to view saved passwords."""
     if os.path.exists(user_password_file):
         show_password_window()
     else:
         set_initial_password()
 
 def set_initial_password():
+    """Sets the initial password for accessing saved passwords."""
     def save_password():
+        """Saves the newly set user password."""
         new_pw = entry.get()
         if new_pw:
             with open(user_password_file, "w") as f:
@@ -120,7 +129,6 @@ def set_initial_password():
     pw_window.title("Set Password")
     pw_window.geometry("350x100")
     pw_window.resizable(False, False)
-    # Removed .iconbitmap(img_ico)
 
     frame = ctk.CTkFrame(pw_window)
     frame.pack(pady=10, padx=10)
@@ -133,16 +141,17 @@ def set_initial_password():
     show_button.pack(side="left")
 
     ctk.CTkButton(pw_window, text="OK", command=save_password).pack(pady=5)
-    center_window(pw_window)  # Center the window
+    center_window(pw_window)
 
 def show_password_window():
+    """Prompts the user for their password to view saved passwords."""
     pw_window = ctk.CTkToplevel(app)
     pw_window.title("Enter Password")
     pw_window.geometry("350x100")
     pw_window.resizable(False, False)
-    # Removed .iconbitmap(img_ico)
 
     def verify():
+        """Verifies the entered password against the saved user password."""
         entered = entry.get()
         if not entered: return
         with open(user_password_file, "r") as f:
@@ -164,9 +173,10 @@ def show_password_window():
     show_button.pack(side="left")
 
     ctk.CTkButton(pw_window, text="OK", command=verify).pack(pady=5)
-    center_window(pw_window)  # Center the window
+    center_window(pw_window)
 
 def toggle_password(entry, button):
+    """Toggles the visibility of the password in an entry field."""
     if entry.cget("show") == "":
         entry.configure(show="*")
         button.configure(text="Show")
@@ -175,6 +185,7 @@ def toggle_password(entry, button):
         button.configure(text="Hide")
 
 def visualize_passwords():
+    """Displays the saved passwords in a new window after successful authentication."""
     if os.path.exists(json_password_file):
         with open(json_password_file, "r") as f:
             data = json.load(f)
@@ -185,7 +196,6 @@ def visualize_passwords():
             pw_win.title("Saved Passwords")
             pw_win.geometry("400x400")
             pw_win.resizable(False, False)
-            # Removed .iconbitmap(img_ico)
 
             box = ctk.CTkFrame(pw_win, fg_color="transparent")
             box.pack(fill="both", expand=True, padx=10, pady=10)
@@ -207,13 +217,14 @@ def visualize_passwords():
                 )
                 password_entry.pack(side="left", fill="x", expand=True)
                 password_entry.select_range(0, len(password))
-            center_window(pw_win)  # Center the window
+            center_window(pw_win)
         else:
             messagebox.showinfo("No Passwords", "No passwords saved.")
     else:
         messagebox.showinfo("No Passwords", "No passwords saved.")
 
 def center_window(window):
+    """Centers a given window on the screen."""
     window.update_idletasks()
     w = window.winfo_width()
     h = window.winfo_height()
@@ -221,13 +232,13 @@ def center_window(window):
     y = (window.winfo_screenheight() // 2) - (h // 2)
     window.geometry(f"+{x}+{y}")
 
-# === Main GUI ===
+# === Main Application GUI ===
 app = ctk.CTk()
-app.title("SuperCool Password Generator")
+app.title("Password Generator")
 app.geometry("500x470")
 app.resizable(False, False)
 
-# Header
+# Header Section
 header_frame = ctk.CTkFrame(app, fg_color="transparent")
 header_frame.pack(fill="x", pady=(10, 0), padx=10)
 
@@ -245,7 +256,7 @@ theme_switch = ctk.CTkSwitch(right_frame, text="", command=change_theme)
 theme_switch.pack(anchor="e")
 theme_switch.select() if dark_theme else theme_switch.deselect()
 
-# Input
+# Input Controls
 length_frame = ctk.CTkFrame(app, fg_color="transparent")
 length_frame.pack(pady=5)
 ctk.CTkLabel(length_frame, text="Length:", font=("Helvetica", 14)).pack(side="left", padx=(0, 10))
@@ -253,7 +264,7 @@ entry_length = ctk.CTkEntry(length_frame, width=60, font=("Helvetica", 14))
 entry_length.insert(0, "12")
 entry_length.pack(side="left")
 
-# Checkboxes
+# Password Options Checkboxes
 check_letters = ctk.CTkCheckBox(app, text="Letters", font=("Helvetica", 14))
 check_numbers = ctk.CTkCheckBox(app, text="Numbers", font=("Helvetica", 14))
 check_symbols = ctk.CTkCheckBox(app, text="Symbols", font=("Helvetica", 14))
@@ -264,9 +275,10 @@ check_letters.pack(pady=3)
 check_numbers.pack(pady=3)
 check_symbols.pack(pady=3)
 
-# Buttons
+# Action Buttons
 ctk.CTkButton(app, text="🎲 Generate Password", command=generate, font=("Helvetica", 16, "bold")).pack(pady=15)
 
+# Password Output Field
 output_var = ctk.StringVar()
 ctk.CTkEntry(app, textvariable=output_var, width=300, font=("Helvetica", 14)).pack(pady=(5, 0))
 strength_label = ctk.CTkLabel(app, text="", font=("Helvetica", 14, "bold"))
@@ -275,10 +287,10 @@ ctk.CTkButton(app, text="📋 Copy Password", command=copy_password, font=("Helv
 ctk.CTkButton(app, text="💾 Save Password", command=save_password, font=("Helvetica", 16, "bold")).pack(pady=10)
 ctk.CTkButton(app, text="🔐 View Passwords", command=request_password_visualization, font=("Helvetica", 16, "bold")).pack(pady=10)
 
-# Footer
+# Footer Information
 footer_label = ctk.CTkLabel(app, text="© 2025 SCSDC. All rights reserved", font=("Helvetica", 12, "italic"))
 footer_label.place(relx=0.5, rely=1, anchor="s")
 update_footer_color()
 
-# Start
+# Start the app
 app.mainloop()
