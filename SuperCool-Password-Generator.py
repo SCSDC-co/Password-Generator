@@ -97,11 +97,11 @@ def update_password_strength(password):
     """Evaluates the password strength and updates the label."""
     if not password:
         strength_label.configure(text="")
-        strength_label.pack(pady=2) 
+        strength_label.pack(pady=2)
     else:
         strength, color = evaluate_strength(password)
         strength_label.configure(text=f"Strength: {strength}", text_color=color)
-        strength_label.pack(pady=2) 
+        strength_label.pack(pady=2)
 
 def copy_password():
     """Copies the generated password to the clipboard."""
@@ -128,7 +128,7 @@ def save_password():
         input_frame.pack(pady=5, padx=10, fill="x")
 
         name_entry = ctk.CTkEntry(input_frame)
-        name_entry.pack(side="left", fill="x", expand=True, padx=(0, 5)) 
+        name_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
         def save_with_name():
             name = name_entry.get()
@@ -149,7 +149,7 @@ def save_password():
         save_button = ctk.CTkButton(input_frame, text="Save", width=80, command=save_with_name)
         save_button.pack(side="right")
 
-        evaluate_strength(password_to_save) 
+        evaluate_strength(password_to_save)
 
     else:
         messagebox.showwarning("Empty", "No password to save.")
@@ -234,13 +234,13 @@ def toggle_password(entry, button):
 
 def visualize_passwords():
     """Displays the saved passwords and their names in a scrollable window."""
-    print("Visualizzazione password avviata") 
+    print("Visualizzazione password avviata")
     if os.path.exists(JSON_PASSWORD_FILE):
         with open(JSON_PASSWORD_FILE, "r") as f:
             try:
                 data = json.load(f)
                 passwords_data = data.get("passwords", [])
-                print(f"Dati password letti: {passwords_data}") 
+                print(f"Dati password letti: {passwords_data}")
             except json.JSONDecodeError:
                 messagebox.showerror("Error", "Error reading the password file.")
                 return
@@ -251,12 +251,12 @@ def visualize_passwords():
     if passwords_data:
         pw_win = ctk.CTkToplevel(app)
         pw_win.title("Saved Passwords")
-        pw_win.geometry("350x400") 
+        pw_win.geometry("400x400")
         pw_win.resizable(False, False)
         center_window(pw_win)
 
-        canvas = Canvas(pw_win, bd=0, highlightthickness=0, bg=pw_win.cget("bg")) 
-        scrollable_frame = ctk.CTkFrame(canvas, fg_color=pw_win.cget("bg")) 
+        canvas = Canvas(pw_win, bd=0, highlightthickness=0, bg=pw_win.cget("bg"))
+        scrollable_frame = ctk.CTkFrame(canvas, fg_color=pw_win.cget("bg"))
         scrollbar = ctk.CTkScrollbar(pw_win, orientation="vertical", command=canvas.yview)
 
         scrollable_frame.bind(
@@ -279,26 +279,26 @@ def visualize_passwords():
 
         scrollable_frame.bind("<Configure>", update_scrollbar)
         canvas.bind("<Enter>", lambda e: scrollable_frame.focus_set())
-        canvas.bind("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")) 
-        canvas.bind("<Button-4>", lambda event: canvas.yview_scroll(-1, "units")) 
-        canvas.bind("<Button-5>", lambda event: canvas.yview_scroll(1, "units")) 
+        canvas.bind("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
+        canvas.bind("<Button-4>", lambda event: canvas.yview_scroll(-1, "units"))
+        canvas.bind("<Button-5>", lambda event: canvas.yview_scroll(1, "units"))
 
         for item in passwords_data:
             name = item.get("name", "Unnamed")
             password = item.get("password", "No Password")
             print(f"Nome nel ciclo: {name}, Password nel ciclo: {password}")
 
-            frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent") 
+            frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
             frame.pack(fill="x", pady=5)
 
             theme_color = "white" if dark_theme else "black"
 
             name_label = ctk.CTkLabel(frame, text=f"{name}:", font=("Helvetica", 14, "bold"), text_color=theme_color)
-            name_label.pack(side="left", padx=(10, 5)) 
+            name_label.pack(side="left", padx=(10, 5))
 
             password_entry = ctk.CTkEntry(frame, state="normal", font=("Helvetica", 14), text_color=theme_color, fg_color=ctk.CTk().cget("fg_color"), border_width=0, border_color=ctk.CTk().cget("fg_color"))
             password_entry.insert(0, password)
-            password_entry.pack(side="left", fill="x", expand=True, padx=(10, 0)) 
+            password_entry.pack(side="left", fill="x", expand=True, padx=(10, 0))
             password_entry.select_range(0, len(password))
 
         empty_label = ctk.CTkLabel(scrollable_frame, text="", height=20)
@@ -375,7 +375,7 @@ strength_label.pack(pady=2)
 
 # Button Actions
 button_row_1 = ctk.CTkFrame(app, fg_color="transparent")
-button_row_1.pack(pady=2, padx=20) 
+button_row_1.pack(pady=2, padx=20)
 
 copy_button = ctk.CTkButton(button_row_1, text="📋 Copy Password", command=copy_password, font=("Helvetica", 16, "bold"))
 copy_button.pack(side="left", expand=True)
