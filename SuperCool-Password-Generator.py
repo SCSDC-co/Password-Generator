@@ -333,7 +333,7 @@ left_space.pack(side="left")
 
 center_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
 center_frame.pack(side="left", expand=True)
-title = ctk.CTkLabel(center_frame, text="Password Generator", font=("Helvetica", 20, "bold"))
+title = ctk.CTkLabel(center_frame, text="SC Password Generator", font=("Helvetica", 20, "bold"))
 title.pack(anchor="center")
 
 right_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
