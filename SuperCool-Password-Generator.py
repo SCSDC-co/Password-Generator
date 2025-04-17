@@ -320,7 +320,7 @@ def center_window(window):
 
 # === Main Application GUI ===
 app = ctk.CTk()
-app.title("Password Generator")
+app.title("SuperCool Password Generator")
 app.geometry("500x400")
 app.resizable(False, False)
 
