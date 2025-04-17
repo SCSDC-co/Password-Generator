@@ -5,6 +5,7 @@ import os
 import random
 import string
 import json
+import threading
 
 # --- Secure Path Configuration ---
 CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".password_generator")
@@ -308,6 +309,8 @@ def visualize_passwords():
 
     else:
         messagebox.showinfo("No Passwords", "No passwords saved.")
+        
+thread = threading.Thread(target=visualize_passwords)
 
 def center_window(window):
     """Centers a given window on the screen."""
@@ -393,3 +396,6 @@ update_footer_color()
 
 # Start the app
 app.mainloop()
+
+
+thread.start()
